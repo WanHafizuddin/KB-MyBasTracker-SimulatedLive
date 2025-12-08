@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, Tooltip, Marker } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { loadData, isServiceActive, timeToSeconds, getCurrentTimeSeconds, interpolatePositionOnShape, getNextArrival, getNextRouteTrip } from '../utils/gtfs';
 
@@ -218,27 +219,40 @@ export default function MapView() {
                     ))}
 
                     {/* Draw Active Buses */}
-                    {activeTrips.map((trip, idx) => (
-                        <CircleMarker
-                            key={`${trip.tripId}-${idx}`}
-                            center={trip.position}
-                            radius={6}
-                            pathOptions={{
-                                fillColor: '#ef4444',
-                                color: 'white',
-                                weight: 2,
-                                fillOpacity: 1
-                            }}
-                        >
-                            <Popup>
-                                <div className="p-1">
-                                    <div className="text-sm font-bold text-gray-900">{trip.route.shortName}</div>
-                                    <div className="text-xs text-gray-600 truncate max-w-[150px]">{trip.headsign}</div>
-                                    <div className="text-xs mt-1 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 inline-block capitalize">{trip.status}</div>
-                                </div>
-                            </Popup>
-                        </CircleMarker>
-                    ))}
+                    {activeTrips.map((trip, idx) => {
+                        const busIcon = new L.DivIcon({
+                            className: 'custom-bus-icon',
+                            html: `<div style="background-color: ${trip.route.color}; boarder: 2px solid white; border-radius: 4px; padding: 2px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 6v6"/>
+                                        <path d="M15 6v6"/>
+                                        <path d="M2 12h19.6"/>
+                                        <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+                                        <circle cx="7" cy="18" r="2"/>
+                                        <path d="M9 18h5"/>
+                                        <circle cx="16" cy="18" r="2"/>
+                                    </svg>
+                                   </div>`,
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        });
+
+                        return (
+                            <Marker
+                                key={`${trip.tripId}-${idx}`}
+                                position={trip.position}
+                                icon={busIcon}
+                            >
+                                <Popup>
+                                    <div className="p-1">
+                                        <div className="text-sm font-bold text-gray-900">{trip.route.shortName}</div>
+                                        <div className="text-xs text-gray-600 truncate max-w-[150px]">{trip.headsign}</div>
+                                        <div className="text-xs mt-1 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 inline-block capitalize">{trip.status}</div>
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        )
+                    })}
                 </MapContainer>
             </div>
 
